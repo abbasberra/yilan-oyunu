@@ -6,45 +6,162 @@
   <title>Yılan Oyunu</title>
   <style>
     body {
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
-      background: #111;
+      background: linear-gradient(160deg, #FDEBF3 0%, #E7F2FB 50%, #E9F9F0 100%);
       margin: 0;
       padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+      min-height: 100vh;
+      box-sizing: border-box;
     }
+
+    .arkaplan-hayvanlar {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hayvan {
+      position: absolute;
+      font-size: 34px;
+      opacity: 0.55;
+      filter: drop-shadow(0 3px 4px rgba(140,120,180,0.15));
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+    }
+
+    @keyframes suzul-sag {
+      0%   { transform: translateX(-10vw) translateY(0) rotate(0deg); }
+      50%  { transform: translateX(55vw) translateY(-18px) rotate(6deg); }
+      100% { transform: translateX(110vw) translateY(0) rotate(0deg); }
+    }
+    @keyframes suzul-sol {
+      0%   { transform: translateX(10vw) translateY(0) rotate(0deg) scaleX(-1); }
+      50%  { transform: translateX(-55vw) translateY(-14px) rotate(-6deg) scaleX(-1); }
+      100% { transform: translateX(-110vw) translateY(0) rotate(0deg) scaleX(-1); }
+    }
+    @keyframes zipla {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-14px); }
+    }
+    @keyframes salla {
+      0%, 100% { transform: rotate(-8deg); }
+      50%      { transform: rotate(8deg); }
+    }
+
+    .kelebek1  { top: 12%; animation: suzul-sag 18s linear infinite; }
+    .kelebek2  { top: 65%; animation: suzul-sol 22s linear infinite; animation-delay: 3s; }
+    .kus1      { top: 22%; animation: suzul-sol 16s linear infinite; animation-delay: 1s; }
+    .kus2      { top: 45%; animation: suzul-sag 26s linear infinite; animation-delay: 5s; }
+    .ari       { top: 78%; animation: suzul-sag 14s linear infinite; animation-delay: 2s; }
+    .tavsan    { bottom: 4%; left: 8%; animation: zipla 2.4s infinite; }
+    .kedi      { bottom: 4%; right: 8%; animation: salla 3s infinite; transform-origin: bottom center; }
+
+    h1 {
+      color: #7C6A9C;
+      font-size: 22px;
+      margin: 6px 0 14px;
+      letter-spacing: 0.5px;
+    }
+
+    #skorKutu {
+      color: #8A7CA8;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
     canvas {
       max-width: 95vw;
       height: auto;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(140, 120, 180, 0.25);
     }
+
+    .kontroller {
+      text-align: center;
+      margin-top: 16px;
+    }
+
     button {
-      font-size: 24px;
-      padding: 10px 20px;
+      font-size: 22px;
+      padding: 10px 18px;
       margin: 4px;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(180deg, #FFFFFF 0%, #F3E9FA 100%);
+      color: #8A7CA8;
+      box-shadow: 0 4px 10px rgba(140, 120, 180, 0.25);
+      cursor: pointer;
+      transition: transform 0.08s ease;
+    }
+
+    button:active {
+      transform: scale(0.92);
+    }
+
+    #btnBastan {
+      display: none;
+      margin-top: 15px;
+      background: linear-gradient(180deg, #FFE3EE 0%, #FFD1E3 100%);
+      color: #B5568B;
+      font-weight: 600;
+    }
+
+    .icerik {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
   </style>
 </head>
 <body>
-  <canvas id="oyunTahtasi" width="400" height="400" style="background: #222;"></canvas>
-
-  <div style="text-align: center; margin-top: 10px;">
-    <div>
-      <button id="btnYukari">▲</button>
-    </div>
-    <div>
-      <button id="btnSol">◀</button>
-      <button id="btnAsagi">▼</button>
-      <button id="btnSag">▶</button>
-    </div>
+  <div class="arkaplan-hayvanlar">
+    <span class="hayvan kelebek1">🦋</span>
+    <span class="hayvan kelebek2">🦋</span>
+    <span class="hayvan kus1">🐦</span>
+    <span class="hayvan kus2">🐤</span>
+    <span class="hayvan ari">🐝</span>
+    <span class="hayvan tavsan">🐰</span>
+    <span class="hayvan kedi">🐱</span>
   </div>
 
-  <button id="btnBastan" style="display:none; margin-top: 15px;">🔁 Baştan Başlat</button>
+  <div class="icerik">
+    <h1>🐍 Yılan Oyunu</h1>
+    <div id="skorKutu">Skor: 0</div>
+
+    <canvas id="oyunTahtasi" width="400" height="400"></canvas>
+
+    <div class="kontroller">
+      <div>
+        <button id="btnYukari">▲</button>
+      </div>
+      <div>
+        <button id="btnSol">◀</button>
+        <button id="btnAsagi">▼</button>
+        <button id="btnSag">▶</button>
+      </div>
+    </div>
+
+    <button id="btnBastan">🔁 Baştan Başlat</button>
+  </div>
 
   <script>
     const tuval = document.getElementById('oyunTahtasi');
     const ctx = tuval.getContext('2d');
+    const skorKutu = document.getElementById('skorKutu');
 
     const KUTU_BOYU = 20;
+    const IZGARA = 20;
 
     let yilan, yon, yem, oyunBitti;
 
@@ -55,21 +172,28 @@
         { x: 3, y: 5 }
       ];
       yon = { x: 1, y: 0 };
-      yem = { x: 10, y: 10 };
+      yeniYemKoy();
       oyunBitti = false;
       document.getElementById('btnBastan').style.display = 'none';
+      skorKutu.textContent = 'Skor: 0';
       ciz();
     }
 
     function yeniYemKoy() {
-      yem = {
-        x: Math.floor(Math.random() * 20),
-        y: Math.floor(Math.random() * 20)
-      };
+      let uygun = false;
+      let aday;
+      while (!uygun) {
+        aday = {
+          x: Math.floor(Math.random() * IZGARA),
+          y: Math.floor(Math.random() * IZGARA)
+        };
+        uygun = !yilan.some(p => p.x === aday.x && p.y === aday.y);
+      }
+      yem = aday;
     }
 
     function carpismaVarMi(bas) {
-      if (bas.x < 0 || bas.x >= 20 || bas.y < 0 || bas.y >= 20) {
+      if (bas.x < 0 || bas.x >= IZGARA || bas.y < 0 || bas.y >= IZGARA) {
         return true;
       }
       for (let i = 0; i < yilan.length; i++) {
@@ -80,24 +204,217 @@
       return false;
     }
 
+    function yuvarlatilmisKare(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
     function ciz() {
-      ctx.fillStyle = '#222';
+      // Pastel oyun alanı (grid deseniyle)
+      const bgGrad = ctx.createLinearGradient(0, 0, tuval.width, tuval.height);
+      bgGrad.addColorStop(0, '#FBF4FA');
+      bgGrad.addColorStop(1, '#EAF6F0');
+      ctx.fillStyle = bgGrad;
       ctx.fillRect(0, 0, tuval.width, tuval.height);
 
-      ctx.fillStyle = 'green';
-      for (let i = 0; i < yilan.length; i++) {
-        let parca = yilan[i];
-        ctx.fillRect(parca.x * KUTU_BOYU, parca.y * KUTU_BOYU, KUTU_BOYU, KUTU_BOYU);
+      ctx.strokeStyle = 'rgba(180, 160, 200, 0.12)';
+      for (let i = 1; i < IZGARA; i++) {
+        ctx.beginPath();
+        ctx.moveTo(i * KUTU_BOYU, 0);
+        ctx.lineTo(i * KUTU_BOYU, tuval.height);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(0, i * KUTU_BOYU);
+        ctx.lineTo(tuval.width, i * KUTU_BOYU);
+        ctx.stroke();
       }
 
-      ctx.fillStyle = 'red';
-      ctx.fillRect(yem.x * KUTU_BOYU, yem.y * KUTU_BOYU, KUTU_BOYU, KUTU_BOYU);
+      // Yılan: kalın gövde + kuyruğa doğru incelen genişlik + pul izleri + yönlü baş
+      const toplam = yilan.length;
+      const kalinlikBas = KUTU_BOYU - 2;
+      const kalinlikKuyruk = 7;
+      const aci = Math.atan2(yon.y, yon.x);
+
+      function merkez(p) {
+        return {
+          cx: p.x * KUTU_BOYU + KUTU_BOYU / 2,
+          cy: p.y * KUTU_BOYU + KUTU_BOYU / 2
+        };
+      }
+
+      ctx.save();
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      ctx.shadowColor = 'rgba(60, 120, 90, 0.35)';
+      ctx.shadowBlur = 6;
+      ctx.shadowOffsetY = 2;
+
+      if (toplam === 1) {
+        const m = merkez(yilan[0]);
+        ctx.fillStyle = 'hsl(150, 45%, 38%)';
+        ctx.beginPath();
+        ctx.ellipse(m.cx, m.cy, kalinlikBas / 2 * 1.15, kalinlikBas / 2 * 0.85, aci, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        for (let i = 0; i < toplam - 1; i++) {
+          const a = merkez(yilan[i]);
+          const b = merkez(yilan[i + 1]);
+          const t = i / (toplam - 1);
+          const lightness = 38 + t * 32; // %38 (koyu, baş) -> %70 (açık, kuyruk)
+          const genislik = kalinlikBas - t * (kalinlikBas - kalinlikKuyruk);
+          ctx.strokeStyle = `hsl(150, 45%, ${lightness}%)`;
+          ctx.lineWidth = genislik;
+          ctx.beginPath();
+          ctx.moveTo(a.cx, a.cy);
+          ctx.lineTo(b.cx, b.cy);
+          ctx.stroke();
+        }
+
+        // Pul izleri (gövdeyi bölümlere ayıran ince çizgiler)
+        ctx.strokeStyle = 'rgba(30, 70, 50, 0.22)';
+        ctx.lineWidth = 1.6;
+        for (let i = 1; i < toplam - 1; i++) {
+          const prev = merkez(yilan[i - 1]);
+          const next = merkez(yilan[i + 1]);
+          let dx = next.cx - prev.cx;
+          let dy = next.cy - prev.cy;
+          const uzunluk = Math.hypot(dx, dy) || 1;
+          dx /= uzunluk; dy /= uzunluk;
+          const px = -dy, py = dx;
+          const t = i / (toplam - 1);
+          const genislik = kalinlikBas - t * (kalinlikBas - kalinlikKuyruk);
+          const yari = genislik * 0.38;
+          const cur = merkez(yilan[i]);
+          ctx.beginPath();
+          ctx.moveTo(cur.cx - px * yari, cur.cy - py * yari);
+          ctx.lineTo(cur.cx + px * yari, cur.cy + py * yari);
+          ctx.stroke();
+        }
+
+        // Baş: yön yönünde elips
+        const basM = merkez(yilan[0]);
+        ctx.fillStyle = 'hsl(150, 45%, 36%)';
+        ctx.beginPath();
+        ctx.ellipse(basM.cx, basM.cy, kalinlikBas / 2 * 1.15, kalinlikBas / 2 * 0.85, aci, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Baş detayları: gözler + çatal dil
+      {
+        const basM = merkez(yilan[0]);
+        const ileriX = Math.cos(aci);
+        const ileriY = Math.sin(aci);
+        const dikX = -ileriY;
+        const dikY = ileriX;
+        const gozIleri = kalinlikBas * 0.16;
+        const gozYan = kalinlikBas * 0.24;
+
+        [1, -1].forEach(function (taraf) {
+          const ex = basM.cx + ileriX * gozIleri + dikX * gozYan * taraf;
+          const ey = basM.cy + ileriY * gozIleri + dikY * gozYan * taraf;
+          ctx.fillStyle = '#FFF3E0';
+          ctx.beginPath();
+          ctx.arc(ex, ey, 2.6, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#2F2F2F';
+          ctx.beginPath();
+          ctx.arc(ex + ileriX * 0.7, ey + ileriY * 0.7, 1.3, 0, Math.PI * 2);
+          ctx.fill();
+        });
+
+        const burunX = basM.cx + ileriX * (kalinlikBas / 2 * 1.15);
+        const burunY = basM.cy + ileriY * (kalinlikBas / 2 * 1.15);
+        const dilUcX = burunX + ileriX * 7;
+        const dilUcY = burunY + ileriY * 7;
+        ctx.strokeStyle = '#D64545';
+        ctx.lineWidth = 1.3;
+        ctx.beginPath();
+        ctx.moveTo(burunX, burunY);
+        ctx.lineTo(dilUcX, dilUcY);
+        ctx.moveTo(dilUcX, dilUcY);
+        ctx.lineTo(dilUcX + dikX * 2 + ileriX * 2, dilUcY + dikY * 2 + ileriY * 2);
+        ctx.moveTo(dilUcX, dilUcY);
+        ctx.lineTo(dilUcX - dikX * 2 + ileriX * 2, dilUcY - dikY * 2 + ileriY * 2);
+        ctx.stroke();
+      }
+
+      // Yem: parlayan yıldız/mücevher
+      const yemCx = yem.x * KUTU_BOYU + KUTU_BOYU / 2;
+      const yemCy = yem.y * KUTU_BOYU + KUTU_BOYU / 2;
+      const disYaricap = KUTU_BOYU / 2 - 1;
+      const icYaricap = disYaricap * 0.42;
+      const zamanAcisi = (Date.now() / 1500) % (Math.PI * 2);
+
+      function yildizYolu(cx, cy, rDis, rIc, nokta, donus) {
+        ctx.beginPath();
+        for (let i = 0; i < nokta * 2; i++) {
+          const r = i % 2 === 0 ? rDis : rIc;
+          const aci = donus + i * Math.PI / nokta;
+          const x = cx + r * Math.cos(aci);
+          const y = cy + r * Math.sin(aci);
+          if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+      }
+
+      ctx.save();
+      // parlama halesi
+      ctx.shadowColor = 'rgba(255, 210, 80, 0.85)';
+      ctx.shadowBlur = 14;
+
+      const yildizGrad = ctx.createRadialGradient(
+        yemCx - disYaricap * 0.25, yemCy - disYaricap * 0.25, 1,
+        yemCx, yemCy, disYaricap
+      );
+      yildizGrad.addColorStop(0, '#FFF7CC');
+      yildizGrad.addColorStop(0.5, '#FFD84D');
+      yildizGrad.addColorStop(1, '#F5A623');
+
+      yildizYolu(yemCx, yemCy, disYaricap, icYaricap, 5, zamanAcisi - Math.PI / 2);
+      ctx.fillStyle = yildizGrad;
+      ctx.fill();
+      ctx.restore();
+
+      // ince altın kontur
+      ctx.strokeStyle = 'rgba(200, 140, 20, 0.5)';
+      ctx.lineWidth = 1;
+      yildizYolu(yemCx, yemCy, disYaricap, icYaricap, 5, zamanAcisi - Math.PI / 2);
+      ctx.stroke();
+
+      // parlaklık noktası
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.beginPath();
+      ctx.arc(yemCx - disYaricap * 0.3, yemCy - disYaricap * 0.3, disYaricap * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+
+      // ufak pırıltı çizgileri (twinkle)
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.lineWidth = 1;
+      const parlamaR = disYaricap * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(yemCx - parlamaR, yemCy);
+      ctx.lineTo(yemCx - parlamaR + 4, yemCy);
+      ctx.moveTo(yemCx + parlamaR, yemCy);
+      ctx.lineTo(yemCx + parlamaR - 4, yemCy);
+      ctx.moveTo(yemCx, yemCy - parlamaR);
+      ctx.lineTo(yemCx, yemCy - parlamaR + 4);
+      ctx.stroke();
 
       if (oyunBitti) {
-        ctx.fillStyle = 'white';
-        ctx.font = '24px sans-serif';
+        ctx.fillStyle = 'rgba(60, 40, 70, 0.55)';
+        ctx.fillRect(0, 0, tuval.width, tuval.height);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 24px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText('Oyun Bitti! Skor: ' + (yilan.length - 3), tuval.width / 2, tuval.height / 2);
+        ctx.fillText('Oyun Bitti!', tuval.width / 2, tuval.height / 2 - 12);
+        ctx.font = '18px sans-serif';
+        ctx.fillText('Skor: ' + (yilan.length - 3), tuval.width / 2, tuval.height / 2 + 16);
       }
     }
 
@@ -118,6 +435,7 @@
 
       if (yeniBas.x === yem.x && yeniBas.y === yem.y) {
         yeniYemKoy();
+        skorKutu.textContent = 'Skor: ' + (yilan.length - 3);
       } else {
         yilan.pop();
       }
