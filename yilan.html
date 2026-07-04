@@ -2,43 +2,76 @@
 <html>
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Yılan Oyunu</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #111;
+      margin: 0;
+      padding: 20px;
+    }
+    canvas {
+      max-width: 95vw;
+      height: auto;
+    }
+    button {
+      font-size: 24px;
+      padding: 10px 20px;
+      margin: 4px;
+    }
+  </style>
 </head>
 <body>
   <canvas id="oyunTahtasi" width="400" height="400" style="background: #222;"></canvas>
+
+  <div style="text-align: center; margin-top: 10px;">
+    <div>
+      <button id="btnYukari">▲</button>
+    </div>
+    <div>
+      <button id="btnSol">◀</button>
+      <button id="btnAsagi">▼</button>
+      <button id="btnSag">▶</button>
+    </div>
+  </div>
+
+  <button id="btnBastan" style="display:none; margin-top: 15px;">🔁 Baştan Başlat</button>
 
   <script>
     const tuval = document.getElementById('oyunTahtasi');
     const ctx = tuval.getContext('2d');
 
-    const KUTU_BOYU = 20; // her kutucuk 20 piksel
+    const KUTU_BOYU = 20;
 
-    // yılan bir dizi, her eleman bir kutucuğun (x,y) konumu
-    let yilan = [
-      { x: 5, y: 5 },
-      { x: 4, y: 5 },
-      { x: 3, y: 5 }
-    ];
+    let yilan, yon, yem, oyunBitti;
 
-    let yon = { x: 1, y: 0 }; // başlangıçta sağa gitsin
-
-    let yem = { x: 10, y: 10 }; // yemin başlangıç konumu
-
-    let oyunBitti = false;
+    function oyunuBaslat() {
+      yilan = [
+        { x: 5, y: 5 },
+        { x: 4, y: 5 },
+        { x: 3, y: 5 }
+      ];
+      yon = { x: 1, y: 0 };
+      yem = { x: 10, y: 10 };
+      oyunBitti = false;
+      document.getElementById('btnBastan').style.display = 'none';
+      ciz();
+    }
 
     function yeniYemKoy() {
       yem = {
-        x: Math.floor(Math.random() * 20), // 0-19 arası rastgele
+        x: Math.floor(Math.random() * 20),
         y: Math.floor(Math.random() * 20)
       };
     }
 
     function carpismaVarMi(bas) {
-      // duvara çarpma
       if (bas.x < 0 || bas.x >= 20 || bas.y < 0 || bas.y >= 20) {
         return true;
       }
-      // kendine çarpma
       for (let i = 0; i < yilan.length; i++) {
         if (yilan[i].x === bas.x && yilan[i].y === bas.y) {
           return true;
@@ -48,60 +81,77 @@
     }
 
     function ciz() {
-      // önce tahtayı temizle
       ctx.fillStyle = '#222';
       ctx.fillRect(0, 0, tuval.width, tuval.height);
 
-      // yılanın her parçasını çiz
       ctx.fillStyle = 'green';
       for (let i = 0; i < yilan.length; i++) {
         let parca = yilan[i];
         ctx.fillRect(parca.x * KUTU_BOYU, parca.y * KUTU_BOYU, KUTU_BOYU, KUTU_BOYU);
       }
 
-      // yemi çiz
       ctx.fillStyle = 'red';
       ctx.fillRect(yem.x * KUTU_BOYU, yem.y * KUTU_BOYU, KUTU_BOYU, KUTU_BOYU);
+
+      if (oyunBitti) {
+        ctx.fillStyle = 'white';
+        ctx.font = '24px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Oyun Bitti! Skor: ' + (yilan.length - 3), tuval.width / 2, tuval.height / 2);
+      }
     }
 
     function hareketEt() {
-      if (oyunBitti) return; // oyun bittiyse hiçbir şey yapma
+      if (oyunBitti) return;
 
       const eskiBas = yilan[0];
       const yeniBas = { x: eskiBas.x + yon.x, y: eskiBas.y + yon.y };
 
       if (carpismaVarMi(yeniBas)) {
         oyunBitti = true;
-        alert('Oyun bitti! Skor: ' + (yilan.length - 3));
+        ciz();
+        document.getElementById('btnBastan').style.display = 'inline-block';
         return;
       }
 
-      yilan.unshift(yeniBas); // yeni başı ekle
+      yilan.unshift(yeniBas);
 
       if (yeniBas.x === yem.x && yeniBas.y === yem.y) {
-        yeniYemKoy(); // yem yendi, kuyruğu silme (büyüsün)
+        yeniYemKoy();
       } else {
-        yilan.pop(); // yem yenmedi, kuyruktan sil (normal hareket)
+        yilan.pop();
       }
 
       ciz();
     }
 
-    ciz(); // ilk çizim
-
     setInterval(hareketEt, 150);
 
     window.addEventListener('keydown', function(event) {
-      if (event.key === 'ArrowUp' && yon.y === 0) {
-        yon = { x: 0, y: -1 };
-      } else if (event.key === 'ArrowDown' && yon.y === 0) {
-        yon = { x: 0, y: 1 };
-      } else if (event.key === 'ArrowLeft' && yon.x === 0) {
-        yon = { x: -1, y: 0 };
-      } else if (event.key === 'ArrowRight' && yon.x === 0) {
-        yon = { x: 1, y: 0 };
-      }
+      if (event.key === 'ArrowUp' && yon.y === 0) yon = { x: 0, y: -1 };
+      else if (event.key === 'ArrowDown' && yon.y === 0) yon = { x: 0, y: 1 };
+      else if (event.key === 'ArrowLeft' && yon.x === 0) yon = { x: -1, y: 0 };
+      else if (event.key === 'ArrowRight' && yon.x === 0) yon = { x: 1, y: 0 };
     });
+
+    function yonDegistir(dx, dy) {
+      if (dx !== 0 && yon.x === 0) yon = { x: dx, y: 0 };
+      if (dy !== 0 && yon.y === 0) yon = { x: 0, y: dy };
+    }
+
+    document.getElementById('btnYukari').addEventListener('touchstart', function(e) { e.preventDefault(); yonDegistir(0, -1); });
+    document.getElementById('btnAsagi').addEventListener('touchstart', function(e) { e.preventDefault(); yonDegistir(0, 1); });
+    document.getElementById('btnSol').addEventListener('touchstart', function(e) { e.preventDefault(); yonDegistir(-1, 0); });
+    document.getElementById('btnSag').addEventListener('touchstart', function(e) { e.preventDefault(); yonDegistir(1, 0); });
+
+    document.getElementById('btnYukari').addEventListener('click', function() { yonDegistir(0, -1); });
+    document.getElementById('btnAsagi').addEventListener('click', function() { yonDegistir(0, 1); });
+    document.getElementById('btnSol').addEventListener('click', function() { yonDegistir(-1, 0); });
+    document.getElementById('btnSag').addEventListener('click', function() { yonDegistir(1, 0); });
+
+    document.getElementById('btnBastan').addEventListener('click', oyunuBaslat);
+
+    oyunuBaslat();
   </script>
 </body>
 </html>
