@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Yılan Oyunu</title>
+</head>
+<body>
+  <canvas id="oyunTahtasi" width="400" height="400" style="background: #222;"></canvas>
+
+  <script>
+    const tuval = document.getElementById('oyunTahtasi');
+    const ctx = tuval.getContext('2d');
+
+    const KUTU_BOYU = 20; // her kutucuk 20 piksel
+
+    // yılan bir dizi, her eleman bir kutucuğun (x,y) konumu
+    let yilan = [
+      { x: 5, y: 5 },
+      { x: 4, y: 5 },
+      { x: 3, y: 5 }
+    ];
+
+    let yon = { x: 1, y: 0 }; // başlangıçta sağa gitsin
+
+    let yem = { x: 10, y: 10 }; // yemin başlangıç konumu
+
+    let oyunBitti = false;
+
+    function yeniYemKoy() {
+      yem = {
+        x: Math.floor(Math.random() * 20), // 0-19 arası rastgele
+        y: Math.floor(Math.random() * 20)
+      };
+    }
+
+    function carpismaVarMi(bas) {
+      // duvara çarpma
+      if (bas.x < 0 || bas.x >= 20 || bas.y < 0 || bas.y >= 20) {
+        return true;
+      }
+      // kendine çarpma
+      for (let i = 0; i < yilan.length; i++) {
+        if (yilan[i].x === bas.x && yilan[i].y === bas.y) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function ciz() {
+      // önce tahtayı temizle
+      ctx.fillStyle = '#222';
+      ctx.fillRect(0, 0, tuval.width, tuval.height);
+
+      // yılanın her parçasını çiz
+      ctx.fillStyle = 'green';
+      for (let i = 0; i < yilan.length; i++) {
+        let parca = yilan[i];
+        ctx.fillRect(parca.x * KUTU_BOYU, parca.y * KUTU_BOYU, KUTU_BOYU, KUTU_BOYU);
+      }
+
+      // yemi çiz
+      ctx.fillStyle = 'red';
+      ctx.fillRect(yem.x * KUTU_BOYU, yem.y * KUTU_BOYU, KUTU_BOYU, KUTU_BOYU);
+    }
+
+    function hareketEt() {
+      if (oyunBitti) return; // oyun bittiyse hiçbir şey yapma
+
+      const eskiBas = yilan[0];
+      const yeniBas = { x: eskiBas.x + yon.x, y: eskiBas.y + yon.y };
+
+      if (carpismaVarMi(yeniBas)) {
+        oyunBitti = true;
+        alert('Oyun bitti! Skor: ' + (yilan.length - 3));
+        return;
+      }
+
+      yilan.unshift(yeniBas); // yeni başı ekle
+
+      if (yeniBas.x === yem.x && yeniBas.y === yem.y) {
+        yeniYemKoy(); // yem yendi, kuyruğu silme (büyüsün)
+      } else {
+        yilan.pop(); // yem yenmedi, kuyruktan sil (normal hareket)
+      }
+
+      ciz();
+    }
+
+    ciz(); // ilk çizim
+
+    setInterval(hareketEt, 150);
+
+    window.addEventListener('keydown', function(event) {
+      if (event.key === 'ArrowUp' && yon.y === 0) {
+        yon = { x: 0, y: -1 };
+      } else if (event.key === 'ArrowDown' && yon.y === 0) {
+        yon = { x: 0, y: 1 };
+      } else if (event.key === 'ArrowLeft' && yon.x === 0) {
+        yon = { x: -1, y: 0 };
+      } else if (event.key === 'ArrowRight' && yon.x === 0) {
+        yon = { x: 1, y: 0 };
+      }
+    });
+  </script>
+</body>
+</html>
